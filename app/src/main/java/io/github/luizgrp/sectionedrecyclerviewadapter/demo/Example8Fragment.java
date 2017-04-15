@@ -1,6 +1,7 @@
 package io.github.luizgrp.sectionedrecyclerviewadapter.demo;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -12,30 +13,27 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
 
-public class Example5Fragment extends Fragment {
+public class Example8Fragment extends Fragment {
+
+    private static final Random RANDOM = new Random();
 
     private SectionedRecyclerViewAdapter sectionAdapter;
+    private RecyclerView recyclerView;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_ex5, container, false);
+        View view = inflater.inflate(R.layout.fragment_ex8, container, false);
 
         sectionAdapter = new SectionedRecyclerViewAdapter();
-
-        sectionAdapter.addSection(new MovieSection(getString(R.string.top_rated_movies_topic), getTopRatedMoviesList()));
-        sectionAdapter.addSection(new MovieSection(getString(R.string.most_popular_movies_topic), getMostPopularMoviesList()));
-
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
 
         GridLayoutManager glm = new GridLayoutManager(getContext(), 2);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -49,8 +47,21 @@ public class Example5Fragment extends Fragment {
                 }
             }
         });
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(glm);
         recyclerView.setAdapter(sectionAdapter);
+
+        addNewSectionToAdapter();
+
+        addNewSectionToAdapter();
+
+        view.findViewById(R.id.btnAdd).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addNewSectionToAdapter();
+            }
+        });
 
         return view;
     }
@@ -62,48 +73,51 @@ public class Example5Fragment extends Fragment {
         if (getActivity() instanceof AppCompatActivity) {
             AppCompatActivity activity = ((AppCompatActivity) getActivity());
             if (activity.getSupportActionBar() != null)
-                activity.getSupportActionBar().setTitle(R.string.nav_example5);
+                activity.getSupportActionBar().setTitle(R.string.nav_example8);
         }
     }
 
-    private List<Movie> getTopRatedMoviesList() {
-        List<String> arrayList = new ArrayList<>(Arrays.asList(getResources()
-                .getStringArray(R.array.top_rated_movies)));
+    private void addNewSectionToAdapter() {
+        String randomNumber = getRandomStringNumber();
+        String sectionTag = String.format("section%sTag", randomNumber);
 
-        List<Movie> movieList = new ArrayList<>();
+        NameSection section = new NameSection(sectionTag,
+                getString(R.string.group_title, randomNumber));
 
-        for (String str : arrayList) {
-            String[] array = str.split("\\|");
-            movieList.add(new Movie(array[0], array[1]));
-        }
+        sectionAdapter.addSection(sectionTag, section);
 
-        return movieList;
+        int sectionPos = sectionAdapter.getSectionPosition(sectionTag);
+
+        sectionAdapter.notifyItemInserted(sectionPos);
+
+        recyclerView.smoothScrollToPosition(sectionPos);
     }
 
-    private List<Movie> getMostPopularMoviesList() {
-        List<String> arrayList = new ArrayList<>(Arrays.asList(getResources()
-                .getStringArray(R.array.most_popular_movies)));
-
-        List<Movie> movieList = new ArrayList<>();
-
-        for (String str : arrayList) {
-            String[] array = str.split("\\|");
-            movieList.add(new Movie(array[0], array[1]));
-        }
-
-        return movieList;
+    @NonNull
+    private String getRandomStringNumber() {
+        return String.valueOf(RANDOM.nextInt(100000));
     }
 
-    class MovieSection extends StatelessSection {
+    private Person getRandomName() {
+        String[] names = getResources().getStringArray(R.array.names);
 
+        String[] randomName = names[RANDOM.nextInt(names.length)].split("\\|");
+
+        return new Person(randomName[0], "ID #" + getRandomStringNumber());
+    }
+
+    class NameSection extends StatelessSection {
+
+        final String TAG;
         String title;
-        List<Movie> list;
+        List<Person> list;
 
-        public MovieSection(String title, List<Movie> list) {
-            super(R.layout.section_ex5_header, R.layout.section_ex5_item);
+        public NameSection(String tag, String title) {
+            super(R.layout.section_ex8_header, R.layout.section_ex8_item);
 
+            this.TAG = tag;
             this.title = title;
-            this.list = list;
+            this.list = new ArrayList<>();
         }
 
         @Override
@@ -118,20 +132,27 @@ public class Example5Fragment extends Fragment {
 
         @Override
         public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
+
             final ItemViewHolder itemHolder = (ItemViewHolder) holder;
 
             String name = list.get(position).getName();
-            String category = list.get(position).getCategory();
+            String category = list.get(position).getId();
 
             itemHolder.tvItem.setText(name);
             itemHolder.tvSubItem.setText(category);
+            itemHolder.imgItem.setImageResource(name.hashCode() % 2 == 0 ? R.drawable.ic_face_black_48dp : R.drawable.ic_tag_faces_black_48dp);
 
             itemHolder.rootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), String.format("Clicked on position #%s of Section %s",
-                            sectionAdapter.getPositionInSection(itemHolder.getAdapterPosition()), title),
-                            Toast.LENGTH_SHORT).show();
+                    int adapterPosition = itemHolder.getAdapterPosition();
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        int positionInSection = sectionAdapter.getPositionInSection(adapterPosition);
+
+                        list.remove(positionInSection);
+
+                        sectionAdapter.notifyItemRemovedFromSection(TAG, positionInSection);
+                    }
                 }
             });
         }
@@ -147,12 +168,25 @@ public class Example5Fragment extends Fragment {
 
             headerHolder.tvTitle.setText(title);
 
-            headerHolder.btnMore.setOnClickListener(new View.OnClickListener() {
+            headerHolder.btnAdd.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), String.format("Clicked on more button from the header of Section %s",
-                            title),
-                            Toast.LENGTH_SHORT).show();
+                    int positionToInsertItemAt = 0;
+
+                    list.add(positionToInsertItemAt, getRandomName());
+
+                    sectionAdapter.notifyItemInsertedInSection(TAG, positionToInsertItemAt);
+                }
+            });
+
+            headerHolder.btnClear.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int contentItemsTotal = getContentItemsTotal();
+
+                    list.clear();
+
+                    sectionAdapter.notifyItemRangeRemovedFromSection(TAG, 0, contentItemsTotal);
                 }
             });
         }
@@ -161,19 +195,22 @@ public class Example5Fragment extends Fragment {
     class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView tvTitle;
-        private final Button btnMore;
+        private final Button btnAdd;
+        private final Button btnClear;
 
         public HeaderViewHolder(View view) {
             super(view);
 
             tvTitle = (TextView) view.findViewById(R.id.tvTitle);
-            btnMore = (Button) view.findViewById(R.id.btnMore);
+            btnAdd = (Button) view.findViewById(R.id.btnAdd);
+            btnClear = (Button) view.findViewById(R.id.btnClear);
         }
     }
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
 
         private final View rootView;
+        private final ImageView imgItem;
         private final TextView tvItem;
         private final TextView tvSubItem;
 
@@ -181,18 +218,19 @@ public class Example5Fragment extends Fragment {
             super(view);
 
             rootView = view;
+            imgItem = (ImageView) view.findViewById(R.id.imgItem);
             tvItem = (TextView) view.findViewById(R.id.tvItem);
             tvSubItem = (TextView) view.findViewById(R.id.tvSubItem);
         }
     }
 
-    class Movie {
+    class Person {
         String name;
-        String category;
+        String id;
 
-        public Movie(String name, String category) {
+        public Person(String name, String id) {
             this.name = name;
-            this.category = category;
+            this.id = id;
         }
 
         public String getName() {
@@ -203,12 +241,12 @@ public class Example5Fragment extends Fragment {
             this.name = name;
         }
 
-        public String getCategory() {
-            return category;
+        public String getId() {
+            return id;
         }
 
-        public void setCategory(String category) {
-            this.category = category;
+        public void setId(String id) {
+            this.id = id;
         }
     }
 }

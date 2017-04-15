@@ -1,11 +1,15 @@
 # SectionedRecyclerViewAdapter
 An Adapter that allows a RecyclerView to be split into Sections with headers and/or footers.
 
+[![Build Status](https://travis-ci.org/luizgrp/SectionedRecyclerViewAdapter.svg?branch=master)](https://travis-ci.org/luizgrp/SectionedRecyclerViewAdapter)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-SectionedRecyclerViewAdapter-green.svg?style=true)](https://android-arsenal.com/details/1/3471)
+
 <img src="https://raw.githubusercontent.com/luizgrp/SectionedRecyclerViewAdapter/master/art/sc1.png" width="300" height="533" >
 <img src="https://raw.githubusercontent.com/luizgrp/SectionedRecyclerViewAdapter/master/art/sc4.png" width="300" height="533" >
 <br><br>
 
 In addition, each Section can have its state(Loading/Loaded/Failed) controlled individually.
+
 <img src="https://raw.githubusercontent.com/luizgrp/SectionedRecyclerViewAdapter/master/art/sc2.png" width="300" height="533" >
 <img src="https://raw.githubusercontent.com/luizgrp/SectionedRecyclerViewAdapter/master/art/sc3.png" width="300" height="533" >
 
@@ -15,7 +19,7 @@ In addition, each Section can have its state(Loading/Loaded/Failed) controlled i
 
 ```groovy
 dependencies {
-    compile 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:1.0.3'
+    compile 'io.github.luizgrp.sectionedrecyclerviewadapter:sectionedrecyclerviewadapter:1.0.5'
 }
 ```
 
@@ -24,7 +28,7 @@ dependencies {
 ```java
 class MySection extends StatelessSection {
 
-    List<String> myList = Arrays.asList(new String[] {"Item1", "Item2", "Item3" });
+    List<String> myList = Arrays.asList("Item1", "Item2", "Item3");
 
     public MySection() {
         // call constructor with layout resources for this Section header and items 
@@ -80,6 +84,11 @@ recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 recyclerView.setAdapter(sectionAdapter);
 ```
 
+## Demo app
+
+You can find a demo app [here](app).
+
+<img src="https://raw.githubusercontent.com/luizgrp/SectionedRecyclerViewAdapter/master/art/demosc.png" width="300" height="533" >
 
 ## Examples
 
@@ -90,6 +99,9 @@ Stateless Section
 - [Section with Header and Footer](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example2Fragment.java)
 - [Expandable Section](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example4Fragment.java)
 - [Grid Section with Header](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example5Fragment.java)
+- [Expandable Grid Section](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example6Fragment.java)
+- [SearchView with Sections](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example7Fragment.java)
+- [Animations](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example8Fragment.java)
 
 Stateful Section
 - [Section with Header and Footer](app/src/main/java/io/github/luizgrp/sectionedrecyclerviewadapter/demo/Example3Fragment.java)
